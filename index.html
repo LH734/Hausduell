@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Hausduell – Physikalische Akademie</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Love+Ya+Like+A+Sister&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --tinte:#2E1A3B; --tinte-tief:#160b1f; --creme:#FDFCE4; --gold:#F5CB5E; --gold-dunkel:#b8912f;
+    --hellblau:#B8E4FF; --mint:#B7E9E4; --rose:#FFC9C9; --lila:#E2D4FE;
+    --gruen:#7BC47F; --rot:#E57373;
+    --glas:rgba(253,252,228,.07); --glas-rand:rgba(253,252,228,.22);
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0; min-height:100%;}
+  body{background:var(--tinte-tief); color:var(--creme); font-family:"Avenir Next","Segoe UI",system-ui,sans-serif;}
+  .grund{position:fixed; inset:0; z-index:0; pointer-events:none;
+    background:radial-gradient(ellipse at 50% 15%, #3d2552 0%, var(--tinte) 45%, var(--tinte-tief) 100%);}
+  .hand,h1,h2,h3{font-family:"Love Ya Like A Sister","Comic Sans MS",cursive; font-weight:normal; letter-spacing:.3px;}
+  h3{margin:0 0 12px; font-size:22px; color:var(--gold);}
+
+  /* ---------- Himmel ---------- */
+  #himmel{position:fixed; inset:0; width:100%; height:100%; z-index:0; pointer-events:none;}
+  .nebel{position:fixed; inset:-20%; z-index:0; pointer-events:none; opacity:.5;
+    background:radial-gradient(40% 30% at 20% 70%, rgba(184,228,255,.18), transparent 70%),
+      radial-gradient(35% 28% at 80% 30%, rgba(245,203,94,.14), transparent 70%),
+      radial-gradient(30% 25% at 60% 85%, rgba(226,212,254,.16), transparent 70%);
+    animation:nebeltreiben 40s ease-in-out infinite alternate;}
+  @keyframes nebeltreiben{from{transform:translate(-2%,-1%) scale(1);} to{transform:translate(2%,1.5%) scale(1.06);}}
+
+  /* ---------- Seiten & Karten ---------- */
+  .seite{position:relative; z-index:1; max-width:1100px; margin:0 auto; padding:22px 18px 60px; display:none;
+    animation:aufsteigen .7s ease-out both;}
+  .seite.aktiv{display:block;}
+  @keyframes aufsteigen{from{opacity:0; transform:translateY(18px);} to{opacity:1; transform:none;}}
+  .karte{background:var(--glas); border:1px solid var(--glas-rand); border-radius:20px; padding:20px 22px; margin:16px 0;
+    backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); box-shadow:0 12px 30px rgba(0,0,0,.35);}
+  .titel{text-align:center; font-size:clamp(34px,6vw,52px); margin:8px 0 2px; color:var(--creme);
+    text-shadow:0 0 18px rgba(245,203,94,.5), 0 0 60px rgba(245,203,94,.2), 0 5px 0 rgba(0,0,0,.35);}
+  .untertitel{text-align:center; opacity:.8; margin:0 0 16px; font-size:16px;}
+  .ueber{letter-spacing:.35em; text-transform:uppercase; font-size:12px; opacity:.7; margin:0 0 6px; text-align:center;}
+  .mitte{text-align:center;}
+  .zeile{display:flex; gap:10px; flex-wrap:wrap; align-items:center;}
+  .fussnote{opacity:.55; font-size:13px; text-align:center; margin-top:18px;}
+  .status{position:fixed; top:8px; right:12px; font-size:12px; opacity:.55; z-index:2;}
+  .leise{opacity:.65; font-size:14px;}
+
+  /* ---------- Knoepfe & Felder ---------- */
+  button{font-family:inherit; font-size:18px; border:none; border-radius:14px; padding:12px 22px; cursor:pointer;
+    color:var(--tinte); background:var(--creme); box-shadow:0 4px 0 rgba(0,0,0,.35); transition:transform .12s, box-shadow .25s, opacity .25s;}
+  button:active{transform:translateY(3px); box-shadow:0 1px 0 rgba(0,0,0,.35);}
+  button:disabled{opacity:.4; cursor:default;}
+  .b-gold{background:var(--gold); font-family:"Love Ya Like A Sister","Comic Sans MS",cursive; font-size:21px;
+    box-shadow:0 5px 0 var(--gold-dunkel), 0 0 26px rgba(245,203,94,.3);}
+  .b-gold:not(:disabled):hover{box-shadow:0 5px 0 var(--gold-dunkel), 0 0 46px rgba(245,203,94,.6);}
+  .b-glas{background:var(--glas); color:var(--creme); border:1.5px solid var(--glas-rand); box-shadow:none;}
+  .b-glas:hover{border-color:rgba(253,252,228,.6);}
+  .b-rot{background:var(--rot); color:#fff; box-shadow:0 5px 0 #a34848;}
+  .b-leise{background:transparent; color:var(--creme); box-shadow:none; text-decoration:underline; font-size:14px; padding:6px 10px; opacity:.75;}
+  .gross{font-size:24px; padding:16px 36px;}
+  .puls{animation:pochen 1.6s ease-in-out infinite;}
+  @keyframes pochen{0%,100%{box-shadow:0 5px 0 var(--gold-dunkel), 0 0 26px rgba(245,203,94,.3);} 50%{box-shadow:0 5px 0 var(--gold-dunkel), 0 0 60px rgba(245,203,94,.75);}}
+  .feld, select{font-family:inherit; font-size:18px; padding:10px 14px; border-radius:12px; color:var(--creme);
+    background:rgba(253,252,228,.06); border:1.5px solid var(--glas-rand); outline:none;}
+  select option{color:var(--tinte);}
+  .feld:focus, select:focus{border-color:var(--gold); box-shadow:0 0 0 3px rgba(245,203,94,.2), 0 0 20px rgba(245,203,94,.35);}
+  .chip{font-family:"Love Ya Like A Sister","Comic Sans MS",cursive; font-size:20px; padding:7px 20px; border-radius:999px;
+    border:2px solid var(--glas-rand); background:var(--glas); color:var(--creme); box-shadow:none; transition:all .25s;}
+  .chip:hover{border-color:rgba(253,252,228,.7);}
+  .chip.aktiv{background:var(--gold); color:var(--tinte); border-color:var(--gold); box-shadow:0 0 22px rgba(245,203,94,.55);}
+  .hinweis{min-height:1.3em; font-size:15px; color:var(--rose); margin:6px 0; text-align:center;}
+  .ok{color:var(--gold);}
+
+  /* ---------- Start: Wappen, Klassen, Code ---------- */
+  .buehne{display:flex; flex-direction:column; align-items:center; gap:22px; min-height:calc(100vh - 80px); justify-content:center;}
+  h1.gross-titel{margin:0; font-size:clamp(46px,9vw,88px); line-height:1; text-align:center; color:var(--creme);
+    text-shadow:0 0 18px rgba(245,203,94,.55), 0 0 60px rgba(245,203,94,.25), 0 6px 0 rgba(0,0,0,.35); animation:glimmen 5s ease-in-out infinite;}
+  @keyframes glimmen{0%,100%{text-shadow:0 0 18px rgba(245,203,94,.5),0 0 60px rgba(245,203,94,.2),0 6px 0 rgba(0,0,0,.35);}
+    50%{text-shadow:0 0 26px rgba(245,203,94,.85),0 0 90px rgba(245,203,94,.35),0 6px 0 rgba(0,0,0,.35);}}
+  .klassen{display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:center;}
+  .klassen .label{font-size:12px; letter-spacing:.25em; text-transform:uppercase; opacity:.65; margin-right:4px;}
+  .haeuser{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:clamp(12px,3vw,34px); width:min(920px,100%);}
+  @media(max-width:640px){ .haeuser{grid-template-columns:repeat(2,1fr);} }
+  .wappen{--f:var(--gold); position:relative; display:flex; flex-direction:column; align-items:center; gap:7px; user-select:none;
+    animation:schweben 6s ease-in-out infinite;}
+  .wappen:nth-child(2){animation-delay:-1.5s;} .wappen:nth-child(3){animation-delay:-3s;} .wappen:nth-child(4){animation-delay:-4.5s;}
+  @keyframes schweben{0%,100%{transform:translateY(0);} 50%{transform:translateY(-10px);}}
+  .siegel{width:clamp(72px,14vw,124px); aspect-ratio:1; border-radius:50%; display:grid; place-items:center;
+    font-size:clamp(32px,6vw,56px); background:radial-gradient(circle at 35% 30%, #fff8 0, transparent 45%), var(--f);
+    color:var(--tinte); border:5px solid rgba(253,252,228,.85);
+    box-shadow:0 0 0 6px color-mix(in srgb, var(--f) 35%, transparent), 0 0 34px color-mix(in srgb, var(--f) 55%, transparent), 0 14px 24px rgba(0,0,0,.45);}
+  .hname{font-size:clamp(15px,2.3vw,21px); color:var(--f); text-shadow:0 2px 0 rgba(0,0,0,.5);}
+  .motto{font-size:11px; letter-spacing:.12em; text-transform:uppercase; opacity:.65; margin-top:-3px; text-align:center;}
+  .punkte{font-size:clamp(16px,2.6vw,24px);}
+  .punkte small{font-size:11px; opacity:.6; margin-left:3px; letter-spacing:.1em;}
+  .balkenmini{width:78%; height:6px; border-radius:99px; background:rgba(255,255,255,.12); overflow:hidden;}
+  .balkenmini i{display:block; height:100%; width:0; background:var(--f); border-radius:99px; transition:width 1.4s cubic-bezier(.2,.8,.2,1);}
+  .fuehrt{position:absolute; top:-10px; right:8%; font-size:11px; letter-spacing:.12em; text-transform:uppercase; background:var(--gold);
+    color:var(--tinte); padding:3px 9px; border-radius:999px; opacity:0; transform:scale(.6); transition:opacity .4s, transform .4s; box-shadow:0 0 14px rgba(245,203,94,.6);}
+  .wappen.spitze .fuehrt{opacity:1; transform:scale(1);}
+  .portal{display:flex; flex-direction:column; align-items:center; gap:12px;}
+  .code{display:flex; gap:12px;}
+  .code input{width:clamp(54px,13vw,84px); height:clamp(66px,15vw,100px); font-size:clamp(34px,7vw,54px); text-align:center; text-transform:uppercase;
+    font-family:inherit; color:var(--creme); background:rgba(253,252,228,.06); border:2px solid rgba(253,252,228,.35); border-radius:18px; outline:none;
+    caret-color:var(--gold); box-shadow:inset 0 0 18px rgba(0,0,0,.35); transition:border-color .2s, box-shadow .2s, transform .2s;}
+  .code input:focus{border-color:var(--gold); box-shadow:0 0 0 4px rgba(245,203,94,.2), 0 0 28px rgba(245,203,94,.45), inset 0 0 18px rgba(0,0,0,.35); transform:translateY(-3px);}
+  .code input.voll{border-color:var(--gold); color:var(--gold); text-shadow:0 0 14px rgba(245,203,94,.7);}
+  .eintreten{position:relative; overflow:hidden; border-radius:999px; padding:14px 46px; font-size:clamp(20px,3.4vw,28px);}
+  .eintreten:not(:disabled)::after{content:""; position:absolute; top:0; left:-60%; width:40%; height:100%;
+    background:linear-gradient(120deg, transparent, rgba(255,255,255,.55), transparent); animation:schimmer 2.2s infinite;}
+  @keyframes schimmer{to{left:130%;}}
+  .fuss{display:flex; justify-content:space-between; width:100%; font-size:12px; opacity:.55; margin-top:10px;}
+  .fuss a{color:var(--creme); text-decoration:underline; cursor:pointer;}
+
+  /* ---------- Modal (PIN) ---------- */
+  .modal{position:fixed; inset:0; z-index:20; display:none; align-items:center; justify-content:center; background:rgba(22,11,31,.7); backdrop-filter:blur(4px);}
+  .modal.da{display:flex;}
+  .modal .karte{width:min(420px,92vw); text-align:center;}
+
+  /* ---------- Namen & Haus ---------- */
+  .namengrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:10px;}
+  .namengrid button{font-size:16px; padding:12px 6px; background:var(--glas); color:var(--creme); border:1.5px solid var(--glas-rand); box-shadow:none;}
+  .namengrid button:hover:not(:disabled){border-color:var(--gold); box-shadow:0 0 18px rgba(245,203,94,.35);}
+  .namengrid button.vergeben{opacity:.3; text-decoration:line-through;}
+  .namengrid button.meiner{border-color:var(--gold); box-shadow:0 0 18px rgba(245,203,94,.5); background:rgba(245,203,94,.15);}
+  .hausgrid{display:grid; grid-template-columns:repeat(4,1fr); gap:16px;}
+  @media(max-width:900px){ .hausgrid{grid-template-columns:repeat(2,1fr);} }
+  .haustile{--f:var(--gold); display:flex; flex-direction:column; align-items:center; gap:8px; padding:22px 10px 18px; background:var(--glas);
+    border:1.5px solid var(--glas-rand); border-radius:22px; box-shadow:none; color:var(--creme);}
+  .haustile .siegel{width:86px; font-size:40px;}
+  .haustile .hname{font-size:22px;}
+  .haustile:hover{border-color:var(--f); box-shadow:0 0 30px color-mix(in srgb, var(--f) 50%, transparent);}
+
+  /* ---------- Spiel ---------- */
+  .kopfzeile{display:flex; justify-content:space-between; align-items:center; font-size:16px; opacity:.85; margin-bottom:4px;}
+  .fragetext{font-size:clamp(20px,3.2vw,30px); line-height:1.35;}
+  .balkenrahmen{background:rgba(255,255,255,.12); border-radius:8px; height:14px; overflow:hidden; margin:12px 0;}
+  .balken{height:100%; background:linear-gradient(90deg, var(--gold), #ffe9a8); width:100%; transition:width .2s linear; box-shadow:0 0 16px rgba(245,203,94,.6);}
+  .antwortgrid{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:6px;}
+  @media(max-width:640px){ .antwortgrid{grid-template-columns:1fr;} }
+  .antwortgrid button{min-height:96px; font-size:20px; color:var(--tinte); white-space:normal; text-align:left; display:flex; align-items:center; gap:14px;
+    padding:14px 18px; border-radius:18px; border:3px solid rgba(253,252,228,.7);}
+  .antwortgrid button .glyph{font-size:26px; flex:0 0 auto; opacity:.8;}
+  .a0{background:var(--gold);} .a1{background:var(--hellblau);} .a2{background:var(--rose);} .a3{background:var(--lila);}
+  .antwortgrid button:not(:disabled):hover{box-shadow:0 0 34px rgba(253,252,228,.5);}
+  .ergebnis{text-align:center; padding:34px 20px;}
+  .ergebnis h2{font-size:48px; margin:0 0 10px;}
+  .ergebnis.gut h2{color:var(--gruen); text-shadow:0 0 30px rgba(123,196,127,.6);}
+  .ergebnis.schlecht h2{color:var(--rose); text-shadow:0 0 30px rgba(255,201,201,.5);}
+  .warte h2{font-size:28px; margin:0;}
+  .punktchen{display:inline-block; width:10px; height:10px; border-radius:50%; background:var(--gold); margin:0 3px; animation:huepfen 1.2s infinite;}
+  .punktchen:nth-child(2){animation-delay:.2s;} .punktchen:nth-child(3){animation-delay:.4s;}
+  @keyframes huepfen{0%,80%,100%{transform:translateY(0); opacity:.4;} 40%{transform:translateY(-8px); opacity:1;}}
+
+  /* ---------- Lehrer ---------- */
+  .siegelreihe{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:14px;}
+  .msiegel{--f:var(--gold); text-align:center; padding:14px 8px; border-radius:18px; background:var(--glas); border:1.5px solid var(--glas-rand);}
+  .msiegel .siegel{width:64px; font-size:30px; margin:0 auto 6px;}
+  .msiegel .pkt{font-size:30px; color:var(--f);}
+  .msiegel .mini{font-size:12px; opacity:.7;}
+  .themen label{display:flex; gap:10px; align-items:center; background:var(--glas); border:1px solid var(--glas-rand); border-radius:12px;
+    padding:9px 14px; margin:6px 0; cursor:pointer;}
+  .themen input{width:22px; height:22px; accent-color:var(--gold);}
+  .trenner{border:0; border-top:1px solid var(--glas-rand); margin:16px 0;}
+
+  /* ---------- Beamer ---------- */
+  .riesig{font-size:clamp(64px,12vw,120px); letter-spacing:.18em; text-align:center; margin:6px 0 10px; color:var(--gold);
+    text-shadow:0 0 30px rgba(245,203,94,.7), 0 6px 0 rgba(0,0,0,.4);}
+  .lobbyhaus{--f:var(--gold); margin:8px 0; padding:10px 14px; border-radius:14px; background:var(--glas); border:1.5px solid color-mix(in srgb, var(--f) 55%, transparent);}
+  .lobbyhaus b{color:var(--f);}
+  .tag{display:inline-block; background:rgba(253,252,228,.14); border-radius:999px; padding:3px 11px; margin:3px; font-size:15px;}
+  .verteilung div{--f:var(--gold); position:relative; color:var(--tinte); border-radius:12px; margin:8px 0; padding:10px 14px; font-size:19px;
+    background:var(--f); overflow:hidden; transition:opacity .3s;}
+  .verteilung div i{position:absolute; inset:0; width:0; background:rgba(0,0,0,.12); transition:width 1s cubic-bezier(.2,.8,.2,1);}
+  .verteilung div span{position:relative;}
+  .verteilung .richtig-markierung{outline:4px solid var(--gruen); box-shadow:0 0 26px rgba(123,196,127,.6);}
+  .verteilung .falsch{opacity:.4;}
+  .konfusius{background:var(--lila); color:var(--tinte); border-radius:12px; padding:10px 14px; margin-top:12px; font-size:18px;}
+  .podest{display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:14px;}
+  .podest .msiegel.sieger{border-color:var(--gold); box-shadow:0 0 40px rgba(245,203,94,.55); animation:pochen-rahmen 2s infinite;}
+  @keyframes pochen-rahmen{0%,100%{box-shadow:0 0 30px rgba(245,203,94,.4);} 50%{box-shadow:0 0 60px rgba(245,203,94,.8);}}
+  .topliste div{font-size:20px; margin:6px 0;}
+
+  @media (prefers-reduced-motion: reduce){ *{animation:none !important;} }
+</style>
+</head>
+<body>
+<div class="grund"></div>
+<canvas id="himmel"></canvas>
+<div class="nebel"></div>
+<div class="status" id="status"></div>
+
+<!-- ======================= START ======================= -->
+<div class="seite aktiv" id="s-start">
+  <div class="buehne">
+    <div>
+      <p class="ueber">Physikalische Akademie</p>
+      <h1 class="gross-titel">Das Hausduell</h1>
+      <p class="untertitel" style="font-size:clamp(16px,2.6vw,22px); margin-top:10px;">Vier Häuser. Eine Frage. Wer weiß es zuerst?</p>
+    </div>
+    <nav class="klassen" id="start-klassen" aria-label="Klasse wählen"><span class="label">Zwischenstand</span></nav>
+    <section class="haeuser" id="start-haeuser" aria-label="Die vier Häuser"></section>
+    <section class="portal">
+      <p class="hand" style="margin:0; font-size:clamp(18px,3vw,26px);">Nenne den Raumcode von der Tafel</p>
+      <div class="code" id="code">
+        <input type="text" maxlength="1" autocomplete="off" aria-label="Buchstabe 1">
+        <input type="text" maxlength="1" autocomplete="off" aria-label="Buchstabe 2">
+        <input type="text" maxlength="1" autocomplete="off" aria-label="Buchstabe 3">
+        <input type="text" maxlength="1" autocomplete="off" aria-label="Buchstabe 4">
+      </div>
+      <button class="b-gold eintreten" id="btn-beitreten" disabled>Eintreten</button>
+      <p class="hinweis" id="start-fehler"></p>
+    </section>
+    <div class="fuss"><span id="start-fuss"></span><a id="btn-lehrer">Lehrerbereich</a></div>
+  </div>
+</div>
+
+<!-- PIN -->
+<div class="modal" id="pin-modal">
+  <div class="karte">
+    <h3>Lehrerbereich</h3>
+    <input class="feld" type="password" id="pin-eingabe" placeholder="PIN" inputmode="numeric" style="width:100%; text-align:center; font-size:26px; letter-spacing:.3em;">
+    <p class="hinweis" id="pin-fehler"></p>
+    <div class="zeile" style="justify-content:center;">
+      <button class="b-gold" id="btn-pin-ok">Öffnen</button>
+      <button class="b-glas" id="btn-pin-abbruch">abbrechen</button>
+    </div>
+  </div>
+</div>
+
+<!-- ======================= SCHÜLER: NAME ======================= -->
+<div class="seite" id="s-name">
+  <h2 class="titel">Wähle deinen Forschernamen</h2>
+  <p class="untertitel">Nimm in jeder Stunde denselben Namen – er sammelt deine Punkte.</p>
+  <p class="hinweis" id="name-hinweis"></p>
+  <div class="karte"><div class="namengrid" id="namengrid"></div></div>
+</div>
+
+<!-- ======================= SCHÜLER: HAUS ======================= -->
+<div class="seite" id="s-haus">
+  <h2 class="titel">Wähle dein Haus</h2>
+  <p class="untertitel">Deine Vier-Ecken-Ecke aus Stunde 2 ist dein Haus.</p>
+  <div class="hausgrid" id="hausgrid"></div>
+</div>
+
+<!-- ======================= SCHÜLER: SPIEL ======================= -->
+<div class="seite" id="s-spiel">
+  <div class="kopfzeile"><span id="sp-kopf"></span><span class="leise" id="sp-code"></span></div>
+  <div id="sp-warte" class="karte mitte warte">
+    <h2 id="sp-warte-text">Warte, bis die Runde startet …</h2>
+    <p style="margin:14px 0 0;"><span class="punktchen"></span><span class="punktchen"></span><span class="punktchen"></span></p>
+  </div>
+  <div id="sp-frage" style="display:none;">
+    <div class="karte"><div class="fragetext" id="sp-fragetext"></div></div>
+    <div class="balkenrahmen"><div class="balken" id="sp-balken"></div></div>
+    <div class="antwortgrid" id="sp-antworten"></div>
+  </div>
+  <div id="sp-ergebnis" class="karte ergebnis" style="display:none;">
+    <h2 id="sp-erg-titel"></h2>
+    <p id="sp-erg-text" style="font-size:20px; margin:0;"></p>
+  </div>
+</div>
+
+<!-- ======================= LEHRER: DASHBOARD ======================= -->
+<div class="seite" id="s-dash">
+  <h1 class="titel">Lehrerbereich</h1>
+  <p class="untertitel" id="dash-modus"></p>
+  <div class="karte">
+    <h3>1 · Klasse</h3>
+    <div class="zeile" id="klassenwahl"></div>
+    <p class="leise" id="klassen-leer" style="display:none; margin:8px 0 0;">Noch keine Klasse angelegt – lege zuerst eine an.</p>
+    <div class="zeile" id="klasse-neu" style="display:none; margin-top:12px;">
+      <span>Klassenstufe</span>
+      <select id="neu-stufe">
+        <option>5</option><option selected>6</option><option>7</option><option>8</option>
+        <option>9</option><option>10</option><option>11</option><option>12</option>
+      </select>
+      <span>Klasse</span>
+      <select id="neu-buchstabe">
+        <option>a</option><option>b</option><option>c</option><option>d</option><option>e</option><option>f</option>
+      </select>
+      <button class="b-gold" id="btn-klasse-ok">anlegen</button>
+    </div>
+  </div>
+  <div class="karte">
+    <h3>2 · Haustafel <span id="dash-klasse-label" class="hand" style="color:var(--creme);"></span></h3>
+    <div class="siegelreihe" id="dash-haustafel"></div>
+    <p class="leise" id="dash-spielerzahl" style="margin:10px 0 0;"></p>
+  </div>
+  <div class="karte themen">
+    <h3>3 · Themengebiete für diese Runde</h3>
+    <div id="themenliste"></div>
+    <div class="zeile" style="margin-top:8px;">
+      <button class="b-glas" id="btn-alle">alle</button>
+      <button class="b-glas" id="btn-keine">keine</button>
+      <span style="margin-left:auto;">Fragen:
+        <select id="fragenzahl"><option>3</option><option selected>5</option><option>8</option><option>10</option></select>
+      </span>
+    </div>
+  </div>
+  <p class="mitte">
+    <button class="b-gold gross puls" id="btn-runde">Runde starten</button>
+    <button class="b-glas" id="btn-demo" style="display:none;">Demo-Runde (mit Übungsrobotern)</button>
+  </p>
+  <div class="karte">
+    <h3>4 · Verwaltung</h3>
+    <div class="zeile">
+      <select id="frei-name"></select>
+      <button class="b-glas" id="btn-freigeben">Forschernamen freigeben</button>
+    </div>
+    <p class="leise" style="margin:6px 0 0;">Löst den Namen in dieser Klasse wieder von Haus und Punkten – z. B. nach einem versehentlichen Klick.</p>
+    <hr class="trenner">
+    <div class="zeile">
+      <select id="loesch-klasse"></select>
+      <button class="b-glas" id="btn-klasse-loeschen">Klasse löschen</button>
+    </div>
+    <p class="leise" style="margin:6px 0 0;">Entfernt die Klasse samt Haustafel und allen Forscherkonten.</p>
+    <hr class="trenner">
+    <div class="zeile"><button class="b-glas" id="btn-sommer">Sommer-Reset …</button></div>
+    <div id="sommer-frage" style="display:none; margin-top:10px;">
+      <p style="font-size:15px;"><b>Achtung:</b> Löscht die Punktestände aller Häuser und Forscher, alle Namens-Zuweisungen
+        und alle Klassen. Das lässt sich nicht rückgängig machen.</p>
+      <div class="zeile">
+        <button class="b-rot" id="btn-sommer-ja">Ja, alles zurücksetzen</button>
+        <button class="b-glas" id="btn-sommer-nein">abbrechen</button>
+      </div>
+    </div>
+    <p class="hinweis ok" id="verw-ok" style="text-align:left;"></p>
+  </div>
+</div>
+
+<!-- ======================= LEHRER: BEAMER ======================= -->
+<div class="seite" id="s-beamer">
+  <div id="be-lobby">
+    <p class="ueber">Physikalische Akademie</p>
+    <h2 class="titel">Tretet ein!</h2>
+    <p class="untertitel">QR scannen → Raumcode eingeben</p>
+    <p class="riesig hand" id="be-code"></p>
+    <div id="be-lobbyliste"></div>
+    <p class="mitte" style="margin-top:18px;">
+      <button class="b-gold gross puls" id="btn-los" disabled>Duell beginnen</button>
+      <button class="b-leise" id="btn-abbruch">abbrechen</button>
+    </p>
+  </div>
+  <div id="be-frage" style="display:none;">
+    <div class="kopfzeile"><span id="be-fortschritt"></span><span class="leise" id="be-zaehler"></span></div>
+    <div class="karte"><div class="fragetext" id="be-fragetext" style="font-size:clamp(24px,3.6vw,36px);"></div>
+      <div id="be-konfusius" class="konfusius" style="display:none;">🧙 Professor Konfusius behauptet das. Stimmt es?</div>
+    </div>
+    <div class="balkenrahmen"><div class="balken" id="be-balken"></div></div>
+    <div class="antwortgrid" id="be-antworten"></div>
+    <p class="mitte" style="margin-top:18px;"><button class="b-glas" id="btn-schliessen">Frage schließen</button></p>
+  </div>
+  <div id="be-aufloesung" style="display:none;">
+    <div class="karte"><div class="fragetext" id="be-aufl-frage"></div>
+      <div class="verteilung" id="be-verteilung" style="margin-top:14px;"></div>
+    </div>
+    <div class="karte" id="be-begruendung" style="display:none;">
+      <h3>🧙 Begründung gefragt!</h3>
+      <p id="be-begr-name" style="font-size:22px;"></p>
+      <div class="zeile">
+        <button class="b-gold" id="btn-begr-ok">Begründung sitzt · +250</button>
+        <button class="b-glas" id="btn-begr-weiter">ohne Bonus weiter</button>
+      </div>
+    </div>
+    <p class="mitte"><button class="b-gold gross" id="btn-weiter">Weiter</button></p>
+  </div>
+  <div id="be-ende" style="display:none;">
+    <h2 class="titel">Endstand der Runde</h2>
+    <div class="podest" id="be-endhaeuser"></div>
+    <div class="karte">
+      <h3>Beste Forscher der Runde</h3>
+      <div id="be-topliste" class="topliste"></div>
+    </div>
+    <p class="mitte"><button class="b-gold gross" id="btn-uebertragen">Punkte auf die Jahreskonten übertragen</button></p>
+    <p class="hinweis ok" id="be-uebertragen-ok"></p>
+  </div>
+</div>
+
+<script src="fragen.js"></script>
+<script>
+"use strict";
+// ================================================================
+//  Sternenhimmel mit Lichtstrahlen
+// ================================================================
+(function(){
+  var c=document.getElementById("himmel"), ctx=c.getContext("2d");
+  var W,H,sterne=[],strahlen=[],dpr=Math.min(window.devicePixelRatio||1,2);
+  var ruhig=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function groesse(){ W=innerWidth; H=innerHeight; c.width=W*dpr; c.height=H*dpr;
+    ctx.setTransform(dpr,0,0,dpr,0,0); sterne=[];
+    var n=Math.min(160,Math.floor(W*H/10000));
+    for(var i=0;i<n;i++) sterne.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.6+.3,
+      p:Math.random()*Math.PI*2, v:.004+Math.random()*.01, d:Math.random()*.15+.02}); }
+  function neuerStrahl(){ var l=Math.random()<.5;
+    strahlen.push({x:l?-80:W+80, y:Math.random()*H*.6, vx:(l?1:-1)*(9+Math.random()*6), vy:2+Math.random()*3,
+      leben:0, max:70+Math.random()*40, farbe:["245,203,94","184,228,255","226,212,254","183,233,228"][Math.floor(Math.random()*4)]}); }
+  function malen(){
+    ctx.clearRect(0,0,W,H);
+    for(var i=0;i<sterne.length;i++){ var s=sterne[i]; s.p+=s.v; s.y+=s.d*.15; if(s.y>H) s.y=-2;
+      var a=.35+.65*(.5+.5*Math.sin(s.p)); ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+      ctx.fillStyle="rgba(253,252,228,"+a.toFixed(2)+")"; ctx.fill(); }
+    if(!ruhig && Math.random()<.01 && strahlen.length<3) neuerStrahl();
+    for(var j=strahlen.length-1;j>=0;j--){ var q=strahlen[j]; q.leben++; q.x+=q.vx; q.y+=q.vy;
+      var f=Math.sin(Math.PI*q.leben/q.max), L=140;
+      var g=ctx.createLinearGradient(q.x,q.y,q.x-q.vx*L/9,q.y-q.vy*L/9);
+      g.addColorStop(0,"rgba("+q.farbe+","+(.9*f).toFixed(2)+")"); g.addColorStop(1,"rgba("+q.farbe+",0)");
+      ctx.strokeStyle=g; ctx.lineWidth=2.2; ctx.lineCap="round"; ctx.beginPath(); ctx.moveTo(q.x,q.y);
+      ctx.lineTo(q.x-q.vx*L/9,q.y-q.vy*L/9); ctx.stroke();
+      if(q.leben>q.max||q.x<-200||q.x>W+200) strahlen.splice(j,1); }
+    if(!ruhig) requestAnimationFrame(malen);
+  }
+  addEventListener("resize",groesse); groesse(); malen();
+})();
+
+// ================================================================
+//  Datenzugriff: Firebase (echt) oder Demo (nur dieses Geraet)
+// ================================================================
+var ECHT = !!KONFIG.firebase;
+var DB = null;
+
+function dbInit(fertig){
+  if(!ECHT){
+    var speicher = {};
+    var lauscher = [];
+    try { var alt = localStorage.getItem("duell-demo");
+          if(alt) speicher = JSON.parse(alt); } catch(e){}
+    function sichern(){ try{ localStorage.setItem("duell-demo",
+        JSON.stringify(speicher)); }catch(e){} }
+    function hol(pfad){ var t=speicher, teile=pfad.split("/");
+      for(var i=0;i<teile.length;i++){ if(t==null) return null; t=t[teile[i]]; }
+      return t==null?null:t; }
+    function setz(pfad,wert){ var t=speicher, teile=pfad.split("/");
+      for(var i=0;i<teile.length-1;i++){ if(typeof t[teile[i]]!=="object"||t[teile[i]]==null) t[teile[i]]={};
+        t=t[teile[i]]; }
+      if(wert===null) delete t[teile[teile.length-1]];
+      else t[teile[teile.length-1]]=wert;
+      sichern();
+      lauscher.forEach(function(l){ if(pfad.indexOf(l.pfad)===0||l.pfad.indexOf(pfad)===0)
+        l.cb(hol(l.pfad)); });
+    }
+    DB = {
+      lesen:function(p,cb){ cb(hol(p)); },
+      schreiben:function(p,w,cb){ setz(p,w); if(cb)cb(); },
+      beanspruchen:function(p,w,cb){ if(hol(p)!==null){ cb(false); return; } setz(p,w); cb(true); },
+      lauschen:function(p,cb){ var l={pfad:p,cb:cb}; lauscher.push(l);
+        cb(hol(p)); return function(){ lauscher.splice(lauscher.indexOf(l),1); }; }
+    };
+    fertig();
+  } else {
+    var s1=document.createElement("script");
+    s1.src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js";
+    s1.onload=function(){
+      var s2=document.createElement("script");
+      s2.src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js";
+      s2.onload=function(){
+        firebase.initializeApp(KONFIG.firebase);
+        var rtdb=firebase.database();
+        DB = {
+          lesen:function(p,cb){ rtdb.ref("duell/"+p).once("value").then(function(s){ cb(s.val()); }); },
+          schreiben:function(p,w,cb){ rtdb.ref("duell/"+p).set(w).then(function(){ if(cb)cb(); }); },
+          // atomar (Transaktion): schreibt nur, wenn der Pfad noch leer ist
+          beanspruchen:function(p,w,cb){
+            rtdb.ref("duell/"+p).transaction(function(aktuell){
+              if(aktuell!==null) return; return w;
+            }, function(fehler, uebernommen){ cb(!fehler&&!!uebernommen); });
+          },
+          lauschen:function(p,cb){ var ref=rtdb.ref("duell/"+p);
+              var f=function(s){ cb(s.val()); }; ref.on("value",f);
+              return function(){ ref.off("value",f); }; }
+        };
+        fertig();
+      };
+      document.head.appendChild(s2);
+    };
+    document.head.appendChild(s1);
+  }
+}
+
+// ================================================================
+//  Hilfen
+// ================================================================
+function $(id){ return document.getElementById(id); }
+function zeige(id){ document.querySelectorAll(".seite").forEach(function(s){
+    s.classList.remove("aktiv"); }); $(id).classList.add("aktiv"); window.scrollTo(0,0); }
+function hausVon(id){ for(var i=0;i<KONFIG.haeuser.length;i++)
+    if(KONFIG.haeuser[i].id===id) return KONFIG.haeuser[i]; return null; }
+function mischen(a){ a=a.slice(); for(var i=a.length-1;i>0;i--){
+    var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+function neuerCode(){ var b="ABCDEFGHJKLMNPQRSTUVWXYZ", c="";
+    for(var i=0;i<4;i++) c+=b[Math.floor(Math.random()*b.length)]; return c; }
+function merke(k,w){ try{ localStorage.setItem(k,w); }catch(e){} }
+function gemerkt(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+function stufeVon(klasse){ return parseInt(klasse,10); }
+function sortiereKlassen(liste){ return liste.sort(function(a,b){
+  return stufeVon(a)!==stufeVon(b) ? stufeVon(a)-stufeVon(b) : a.localeCompare(b); }); }
+var GLYPH=["▲","◆","●","■"];
+var MOTTO={mechanica:"Kraft · Bewegung", optica:"Licht · Sehen",
+           thermodynamica:"Wärme · Energie", electra:"Strom · Magnet"};
+
+// Klassen leben in der Datenbank. Beim allerersten Start werden die
+// Klassen aus fragen.js einmalig uebernommen; danach zaehlt nur die DB
+// (so bleibt die Liste nach dem Sommer-Reset wirklich leer).
+function ladeKlassen(cb){
+  DB.lesen("klassen", function(k){
+    if(k){ cb(sortiereKlassen(Object.keys(k))); return; }
+    DB.lesen("klassen_init", function(init){
+      if(init || !KONFIG.klassen.length){ cb([]); return; }
+      var obj={}; KONFIG.klassen.forEach(function(n){ obj[n]=true; });
+      DB.schreiben("klassen_init", true, function(){
+        DB.schreiben("klassen", obj, function(){ cb(sortiereKlassen(KONFIG.klassen.slice())); });
+      });
+    });
+  });
+}
+
+// ================================================================
+//  Gemeinsamer Zustand
+// ================================================================
+var ROLLE=null, CODE=null, KLASSE=null, NAME=null, HAUS=null;
+var stopLauscher=null;
+
+// ================================================================
+//  START: Wappen, Zwischenstand, Raumcode
+// ================================================================
+var startLaeufer={};
+function baueStart(){
+  var wrap=$("start-haeuser"); wrap.innerHTML="";
+  KONFIG.haeuser.forEach(function(h){
+    var d=document.createElement("div"); d.className="wappen"; d.style.setProperty("--f",h.farbe); d.dataset.haus=h.id;
+    d.innerHTML="<span class='fuehrt'>führt</span><div class='siegel'>"+h.emoji+"</div>"+
+      "<div class='hname hand'>"+h.name+"</div><div class='motto'>"+(MOTTO[h.id]||"")+"</div>"+
+      "<div class='punkte hand'>0<small>PUNKTE</small></div><div class='balkenmini'><i></i></div>";
+    wrap.appendChild(d);
+  });
+  var nav=$("start-klassen");
+  nav.querySelectorAll(".chip").forEach(function(c){ c.remove(); });
+  ladeKlassen(function(liste){
+    nav.style.display = liste.length ? "flex" : "none";
+    liste.forEach(function(k){
+      var b=document.createElement("button"); b.className="chip"; b.textContent=k;
+      b.onclick=function(){ zeigeStand(k); }; nav.appendChild(b);
+    });
+    var g=gemerkt("duell-start-klasse");
+    if(liste.length) zeigeStand(liste.indexOf(g)>=0?g:liste[0]);
+  });
+}
+function zeigeStand(k){
+  merke("duell-start-klasse",k);
+  $("start-klassen").querySelectorAll(".chip").forEach(function(c){ c.classList.toggle("aktiv",c.textContent===k); });
+  DB.lesen("konten/"+k+"/haeuser", function(st){
+    st=st||{}; var max=0; KONFIG.haeuser.forEach(function(h){ max=Math.max(max,st[h.id]||0); });
+    document.querySelectorAll("#start-haeuser .wappen").forEach(function(w){
+      var id=w.dataset.haus, ziel=st[id]||0, p=w.querySelector(".punkte"), von=parseInt(p.textContent,10)||0;
+      var small=p.querySelector("small").outerHTML, start=null;
+      cancelAnimationFrame(startLaeufer[id]);
+      (function schritt(ts){ if(!start) start=ts; var kk=Math.min(1,(ts-start)/1200); kk=1-Math.pow(1-kk,3);
+        p.innerHTML=Math.round(von+(ziel-von)*kk)+small; if(kk<1) startLaeufer[id]=requestAnimationFrame(schritt); })(performance.now());
+      w.querySelector(".balkenmini i").style.width=(max?ziel/max*100:0)+"%";
+      w.classList.toggle("spitze", max>0 && ziel===max);
+    });
+  });
+}
+var felder=[].slice.call(document.querySelectorAll("#code input"));
+felder.forEach(function(f,i){
+  f.addEventListener("input",function(){
+    f.value=f.value.replace(/[^a-z]/i,"").toUpperCase(); f.classList.toggle("voll",!!f.value);
+    if(f.value && i<3) felder[i+1].focus(); codePruefen(); });
+  f.addEventListener("keydown",function(e){
+    if(e.key==="Backspace"&&!f.value&&i>0){ felder[i-1].value=""; felder[i-1].classList.remove("voll"); felder[i-1].focus(); codePruefen(); }
+    if(e.key==="Enter"&&!$("btn-beitreten").disabled) $("btn-beitreten").click(); });
+  f.addEventListener("paste",function(e){ var t=(e.clipboardData.getData("text")||"").replace(/[^a-z]/gi,"").toUpperCase().slice(0,4);
+    if(t.length){ e.preventDefault(); t.split("").forEach(function(ch,k){ felder[k].value=ch; felder[k].classList.add("voll"); });
+      felder[Math.min(3,t.length-1)].focus(); codePruefen(); } });
+});
+function codeWert(){ return felder.map(function(f){ return f.value; }).join(""); }
+function codePruefen(){ $("btn-beitreten").disabled = codeWert().length!==4; $("btn-beitreten").classList.toggle("puls", codeWert().length===4); }
+$("btn-beitreten").onclick=function(){
+  var code=codeWert();
+  if(code.length!==4){ $("start-fehler").textContent="Der Code hat vier Buchstaben."; return; }
+  DB.lesen("sessions/"+code+"/klasse", function(kl){
+    if(!kl){ $("start-fehler").textContent="Diesen Raum gibt es (noch) nicht."; return; }
+    $("start-fehler").textContent="";
+    ROLLE="schueler"; CODE=code; KLASSE=kl;
+    baueNamenwahl();
+  });
+};
+$("btn-lehrer").onclick=function(){ $("pin-eingabe").value=""; $("pin-fehler").textContent="";
+  $("pin-modal").classList.add("da"); setTimeout(function(){ $("pin-eingabe").focus(); },50); };
+$("btn-pin-abbruch").onclick=function(){ $("pin-modal").classList.remove("da"); };
+$("pin-eingabe").addEventListener("keydown",function(e){ if(e.key==="Enter") $("btn-pin-ok").click(); });
+$("btn-pin-ok").onclick=function(){
+  if($("pin-eingabe").value===KONFIG.lehrerPin){ $("pin-modal").classList.remove("da"); ROLLE="lehrer"; baueDashboard(); }
+  else $("pin-fehler").textContent="Das war nicht die richtige PIN.";
+};
+
+// ================================================================
+//  SCHÜLER
+// ================================================================
+var stopNamenLauscher=null;
+function baueNamenwahl(){
+  var konten={}, inRunde={};
+  function malen(){
+    var grid=$("namengrid"); grid.innerHTML="";
+    var vorschlag=gemerkt("duell-name-"+KLASSE);
+    // Wiedereinstieg gilt NUR, wenn dieses Geraet den Namen in GENAU dieser
+    // Runde selbst reserviert hat (geteilte Schul-Tablets!).
+    var meineRunde=gemerkt("duell-runde");
+    KONFIG.forschernamen.forEach(function(n){
+      var b=document.createElement("button");
+      var bekannt=konten[n];
+      var besetzt=!!inRunde[n];
+      var meiner=(meineRunde===CODE+":"+n);
+      b.textContent=(bekannt?hausVon(bekannt.haus).emoji+" ":"")+n;
+      if(besetzt&&!meiner){ b.disabled=true; b.classList.add("vergeben"); }
+      else if(meiner||(n===vorschlag&&!besetzt)) b.classList.add("meiner");
+      b.onclick=function(){
+        if(besetzt){
+          if(!meiner) return;
+          NAME=n; var h=inRunde[n]&&inRunde[n].haus;
+          if(h){ HAUS=h; wiedereinsteigen(); } else baueHauswahl();
+          return;
+        }
+        // Name SOFORT atomar reservieren - noch vor der Hauswahl
+        var bekanntesHaus=bekannt?bekannt.haus:"";
+        DB.beanspruchen("sessions/"+CODE+"/spieler/"+n, {haus:bekanntesHaus}, function(ok){
+          if(!ok){ $("name-hinweis").textContent=n+" ist gerade vergeben worden. Wähle einen anderen Namen."; return; }
+          $("name-hinweis").textContent="";
+          NAME=n; merke("duell-name-"+KLASSE,n); merke("duell-runde",CODE+":"+n);
+          if(bekannt){ HAUS=bekannt.haus; wiedereinsteigen(); } else baueHauswahl();
+        });
+      };
+      grid.appendChild(b);
+    });
+  }
+  DB.lesen("konten/"+KLASSE+"/spieler", function(sp){
+    konten=sp||{};
+    if(stopNamenLauscher) stopNamenLauscher();
+    stopNamenLauscher=DB.lauschen("sessions/"+CODE+"/spieler", function(sp2){ inRunde=sp2||{}; malen(); });
+    zeige("s-name");
+  });
+}
+function baueHauswahl(){
+  var grid=$("hausgrid"); grid.innerHTML="";
+  KONFIG.haeuser.forEach(function(h){
+    var b=document.createElement("button"); b.className="haustile"; b.style.setProperty("--f",h.farbe);
+    b.innerHTML="<div class='siegel'>"+h.emoji+"</div><div class='hname hand' style='color:"+h.farbe+";'>"+h.name+
+      "</div><div class='motto'>"+(MOTTO[h.id]||"")+"</div>";
+    b.onclick=function(){ HAUS=h.id;
+      DB.schreiben("konten/"+KLASSE+"/spieler/"+NAME, {haus:HAUS, punkte:0}, function(){
+        DB.schreiben("sessions/"+CODE+"/spieler/"+NAME, {haus:HAUS}, wiedereinsteigen); }); };
+    grid.appendChild(b);
+  });
+  zeige("s-haus");
+}
+function wiedereinsteigen(){
+  if(stopNamenLauscher){ stopNamenLauscher(); stopNamenLauscher=null; }
+  $("name-hinweis").textContent="";
+  var h=hausVon(HAUS);
+  $("sp-kopf").innerHTML="<span class='hand' style='font-size:22px;'>"+NAME+"</span> &nbsp;·&nbsp; "+
+    "<span style='color:"+h.farbe+";'>"+h.emoji+" "+h.name+"</span>";
+  $("sp-code").textContent="Raum "+CODE;
+  zeige("s-spiel");
+  schuelerLauschen();
+}
+var spFrageNr=-1, spGeantwortet=false, spFrageStart=0, spTimer=null;
+function schuelerLauschen(){
+  if(stopLauscher) stopLauscher();
+  stopLauscher=DB.lauschen("sessions/"+CODE, function(s){
+    if(!s){ zeige("s-start"); baueStart(); return; }
+    if(s.phase==="lobby"){ zeigeWarte("Du bist drin! Warte auf den Start …"); }
+    else if(s.phase==="frage"){ schuelerFrage(s); }
+    else if(s.phase==="aufloesung"){ schuelerAufloesung(s); }
+    else if(s.phase==="ende"){ zeigeWarte("Runde vorbei – schaut nach vorn zur Siegerehrung!"); }
+  });
+}
+function zeigeWarte(text){
+  $("sp-warte").style.display="block"; $("sp-frage").style.display="none";
+  $("sp-ergebnis").style.display="none"; $("sp-warte-text").textContent=text;
+}
+function schuelerFrage(s){
+  if(s.frageNr!==spFrageNr){ spFrageNr=s.frageNr; spGeantwortet=false; spFrageStart=Date.now(); }
+  if(spGeantwortet) return;
+  $("sp-warte").style.display="none"; $("sp-ergebnis").style.display="none";
+  $("sp-frage").style.display="block";
+  $("sp-fragetext").textContent=s.frage.frage;
+  var wrap=$("sp-antworten"); wrap.innerHTML="";
+  s.frage.antworten.forEach(function(txt,i){
+    var b=document.createElement("button"); b.className="a"+i;
+    b.innerHTML="<span class='glyph'>"+GLYPH[i]+"</span><span></span>";
+    b.lastChild.textContent=txt;
+    b.onclick=function(){
+      if(spGeantwortet) return; spGeantwortet=true;
+      DB.schreiben("sessions/"+CODE+"/antworten/"+s.frageNr+"/"+NAME, {wahl:i, ms:Date.now()-spFrageStart});
+      zeigeWarte("Antwort abgegeben – warte auf die Auflösung …");
+    };
+    wrap.appendChild(b);
+  });
+  if(spTimer) clearInterval(spTimer);
+  var dauer=s.frage.zeit*1000;
+  spTimer=setInterval(function(){
+    var rest=1-(Date.now()-spFrageStart)/dauer;
+    $("sp-balken").style.width=Math.max(0,rest*100)+"%";
+    if(rest<=0){ clearInterval(spTimer);
+      if(!spGeantwortet){ spGeantwortet=true; zeigeWarte("Zeit vorbei – warte auf die Auflösung …"); } }
+  },100);
+}
+function schuelerAufloesung(s){
+  if(spTimer) clearInterval(spTimer);
+  spGeantwortet=true;
+  $("sp-warte").style.display="none"; $("sp-frage").style.display="none";
+  var erg=$("sp-ergebnis"); erg.style.display="block";
+  var meine=(s.antworten&&s.antworten[s.frageNr]&&s.antworten[s.frageNr][NAME])||null;
+  if(meine&&meine.wahl===s.frage.richtig){
+    erg.className="karte ergebnis gut";
+    $("sp-erg-titel").textContent="✔ Richtig!";
+    $("sp-erg-text").textContent="+"+punkteFuer(meine,s.frage)+" Punkte für "+hausVon(HAUS).name;
+  } else {
+    erg.className="karte ergebnis schlecht";
+    $("sp-erg-titel").textContent=meine?"✘ Leider falsch":"⌛ Keine Antwort";
+    $("sp-erg-text").textContent="Richtig war: "+s.frage.antworten[s.frage.richtig];
+  }
+}
+
+// ================================================================
+//  LEHRER: Dashboard
+// ================================================================
+var VERW_MELDUNG="";
+function baueDashboard(){
+  $("dash-modus").textContent = ECHT ? "verbunden mit der Klassen-Datenbank" :
+    "DEMO-MODUS ohne Datenbank – alles bleibt nur auf diesem Gerät.";
+  $("btn-demo").style.display = ECHT ? "none" : "inline-block";
+  ladeKlassen(function(alle){
+    var kw=$("klassenwahl"); kw.innerHTML="";
+    alle.forEach(function(k){
+      var b=document.createElement("button"); b.className="chip"; b.textContent=k;
+      b.onclick=function(){ KLASSE=k; merke("duell-klasse",k);
+        kw.querySelectorAll(".chip").forEach(function(x){ x.classList.toggle("aktiv",x===b); });
+        baueThemen(); dashAktualisieren(); };
+      kw.appendChild(b);
+    });
+    var plus=document.createElement("button"); plus.className="b-leise"; plus.textContent="+ Klasse hinzufügen";
+    plus.onclick=function(){ var f=$("klasse-neu"); f.style.display = f.style.display==="none" ? "flex" : "none"; };
+    kw.appendChild(plus);
+    $("klassen-leer").style.display = alle.length ? "none" : "block";
+    $("klasse-neu").style.display = alle.length ? "none" : "flex";
+    $("verw-ok").textContent=VERW_MELDUNG; VERW_MELDUNG="";
+    $("sommer-frage").style.display="none";
+    var ls=$("loesch-klasse"); ls.innerHTML="";
+    alle.forEach(function(k){ var o=document.createElement("option"); o.value=k; o.textContent=k; ls.appendChild(o); });
+    if(!alle.length) ls.innerHTML="<option value=''>– keine Klasse –</option>";
+    $("btn-klasse-loeschen").disabled=!alle.length; $("btn-klasse-loeschen").textContent="Klasse löschen";
+    zeige("s-dash");
+    if(!alle.length){
+      KLASSE=null; $("dash-klasse-label").textContent=""; $("dash-haustafel").innerHTML="";
+      $("dash-spielerzahl").textContent=""; $("themenliste").innerHTML="";
+      $("btn-runde").disabled=true; $("btn-demo").disabled=true;
+      $("frei-name").innerHTML="<option>– keine Klasse –</option>"; $("btn-freigeben").disabled=true;
+      return;
+    }
+    $("btn-runde").disabled=false; $("btn-demo").disabled=false;
+    var letzte=gemerkt("duell-klasse");
+    var knopf=[].slice.call(kw.querySelectorAll(".chip")).find(function(b){ return b.textContent===letzte; });
+    (knopf||kw.querySelector(".chip")).click();
+  });
+}
+$("btn-klasse-ok").onclick=function(){
+  var name=$("neu-stufe").value+$("neu-buchstabe").value;
+  merke("duell-klasse",name);
+  DB.schreiben("klassen/"+name, true, baueDashboard);
+};
+function dashAktualisieren(){
+  $("dash-klasse-label").textContent=" – Klasse "+KLASSE;
+  DB.lesen("konten/"+KLASSE, function(k){
+    k=k||{}; var haeuser=k.haeuser||{}, spieler=k.spieler||{};
+    var tafel=$("dash-haustafel"); tafel.innerHTML="";
+    KONFIG.haeuser.forEach(function(h){
+      var d=document.createElement("div"); d.className="msiegel"; d.style.setProperty("--f",h.farbe);
+      var mitglieder=Object.keys(spieler).filter(function(n){ return spieler[n].haus===h.id; }).length;
+      d.innerHTML="<div class='siegel'>"+h.emoji+"</div><div class='hand' style='color:"+h.farbe+"'>"+h.name+"</div>"+
+        "<div class='pkt hand'>"+(haeuser[h.id]||0)+"</div><div class='mini'>"+mitglieder+" Forscher</div>";
+      tafel.appendChild(d);
+    });
+    $("dash-spielerzahl").textContent=Object.keys(spieler).length+" Forschernamen sind in dieser Klasse vergeben.";
+    var frei=$("frei-name"); frei.innerHTML="";
+    var namen=Object.keys(spieler).sort();
+    if(namen.length===0){ frei.innerHTML="<option>– kein Name vergeben –</option>"; $("btn-freigeben").disabled=true; }
+    else { namen.forEach(function(n){ var o=document.createElement("option"); var h=hausVon(spieler[n].haus);
+        o.value=n; o.textContent=(h?h.emoji+" ":"")+n+" ("+(spieler[n].punkte||0)+" P)"; frei.appendChild(o); });
+      $("btn-freigeben").disabled=false; }
+    $("btn-freigeben").textContent="Forschernamen freigeben";
+  });
+}
+function baueThemen(){
+  var stufe=stufeVon(KLASSE), gruppen={};
+  FRAGEN.forEach(function(f){ if((f.stufe||6)!==stufe) return;
+    var s="Stunde "+f.stunde+": "+f.thema;
+    if(!gruppen[s]) gruppen[s]={anz:0, stunde:f.stunde}; gruppen[s].anz++; });
+  var liste=$("themenliste"); liste.innerHTML="";
+  var titel=Object.keys(gruppen);
+  if(titel.length===0){ liste.innerHTML="<p class='leise'>Für Klassenstufe "+stufe+" sind noch keine Fragen im Katalog (fragen.js).</p>"; return; }
+  titel.sort(function(a,b){ return gruppen[a].stunde-gruppen[b].stunde; }).forEach(function(name){
+    var l=document.createElement("label");
+    l.innerHTML="<input type='checkbox' checked data-stunde='"+gruppen[name].stunde+"'> "+name+
+      " <span style='margin-left:auto;opacity:.6;'>"+gruppen[name].anz+" Fragen</span>";
+    liste.appendChild(l);
+  });
+}
+$("btn-alle").onclick=function(){ document.querySelectorAll("#themenliste input").forEach(function(c){ c.checked=true; }); };
+$("btn-keine").onclick=function(){ document.querySelectorAll("#themenliste input").forEach(function(c){ c.checked=false; }); };
+
+// ================================================================
+//  LEHRER: Verwaltung
+// ================================================================
+$("btn-freigeben").onclick=function(){
+  var name=$("frei-name").value; if(!name) return;
+  if($("btn-freigeben").textContent.indexOf("Wirklich")!==0){ $("btn-freigeben").textContent="Wirklich freigeben?"; return; }
+  DB.schreiben("konten/"+KLASSE+"/spieler/"+name, null, function(){
+    $("verw-ok").textContent="✔ "+name+" ist wieder frei."; dashAktualisieren(); });
+};
+$("frei-name").onchange=function(){ $("btn-freigeben").textContent="Forschernamen freigeben"; };
+$("loesch-klasse").onchange=function(){ $("btn-klasse-loeschen").textContent="Klasse löschen"; };
+$("btn-klasse-loeschen").onclick=function(){
+  var k=$("loesch-klasse").value; if(!k) return;
+  if($("btn-klasse-loeschen").textContent.indexOf("Wirklich")!==0){
+    $("btn-klasse-loeschen").textContent="Wirklich "+k+" löschen?"; return; }
+  DB.schreiben("konten/"+k, null, function(){
+    DB.schreiben("klassen/"+k, null, function(){
+      if(gemerkt("duell-klasse")===k) merke("duell-klasse","");
+      VERW_MELDUNG="✔ Klasse "+k+" ist gelöscht."; baueDashboard(); });
+  });
+};
+$("btn-sommer").onclick=function(){ $("sommer-frage").style.display="block"; };
+$("btn-sommer-nein").onclick=function(){ $("sommer-frage").style.display="none"; };
+$("btn-sommer-ja").onclick=function(){
+  DB.schreiben("konten", null, function(){
+    DB.schreiben("sessions", null, function(){
+      DB.schreiben("klassen", null, function(){
+        VERW_MELDUNG="✔ Alles zurückgesetzt – schöne Ferien! Lege für das neue Schuljahr die Klassen neu an.";
+        baueDashboard();
+      });
+    });
+  });
+};
+
+// ================================================================
+//  LEHRER: Runde
+// ================================================================
+var rundenFragen=[], frageNr=-1, beTimer=null, beDaten=null, demoBots=false, aktuelleFrage=null;
+var rundenPunkte={};
+
+$("btn-runde").onclick=function(){ starteRunde(false); };
+$("btn-demo").onclick=function(){ starteRunde(true); };
+
+function gewaehlteFragen(){
+  var stunden=[]; document.querySelectorAll("#themenliste input").forEach(function(c){
+    if(c.checked) stunden.push(parseInt(c.dataset.stunde,10)); });
+  var stufe=stufeVon(KLASSE);
+  var pool=FRAGEN.filter(function(f){ return (f.stufe||6)===stufe && stunden.indexOf(f.stunde)>=0; });
+  return mischen(pool).slice(0,parseInt($("fragenzahl").value,10));
+}
+function starteRunde(demo){
+  demoBots=demo;
+  rundenFragen=gewaehlteFragen();
+  if(rundenFragen.length===0){ $("verw-ok").textContent="Bitte mindestens ein Themengebiet wählen."; return; }
+  CODE=neuerCode(); frageNr=-1; rundenPunkte={};
+  DB.schreiben("sessions/"+CODE, {klasse:KLASSE, phase:"lobby", spieler:null, antworten:null}, function(){
+    $("be-code").textContent=CODE;
+    $("be-lobby").style.display="block"; $("be-frage").style.display="none";
+    $("be-aufloesung").style.display="none"; $("be-ende").style.display="none";
+    zeige("s-beamer");
+    lehrerLauschen();
+    if(demoBots) setTimeout(botsBeitreten, 800);
+  });
+}
+function botsBeitreten(){
+  var namen=mischen(KONFIG.forschernamen).slice(0,8);
+  namen.forEach(function(n,i){
+    var haus=KONFIG.haeuser[i%4].id;
+    DB.schreiben("konten/"+KLASSE+"/spieler/"+n, {haus:haus, punkte:0});
+    DB.schreiben("sessions/"+CODE+"/spieler/"+n, {haus:haus});
+  });
+}
+function lehrerLauschen(){
+  if(stopLauscher) stopLauscher();
+  stopLauscher=DB.lauschen("sessions/"+CODE, function(s){
+    beDaten=s||{};
+    if(beDaten.phase==="lobby") lobbyAnzeigen();
+    if(beDaten.phase==="frage") zaehlerAnzeigen();
+  });
+}
+function lobbyAnzeigen(){
+  var spieler=beDaten.spieler||{};
+  var wrap=$("be-lobbyliste"); wrap.innerHTML="";
+  KONFIG.haeuser.forEach(function(h){
+    var d=document.createElement("div"); d.className="lobbyhaus"; d.style.setProperty("--f",h.farbe);
+    var namen=Object.keys(spieler).filter(function(n){ return spieler[n].haus===h.id; });
+    d.innerHTML="<b>"+h.emoji+" "+h.name+"</b> ("+namen.length+") "+
+      namen.map(function(n){ return "<span class='tag'>"+n+"</span>"; }).join("");
+    wrap.appendChild(d);
+  });
+  var ohneHaus=Object.keys(spieler).filter(function(n){ return !spieler[n].haus; });
+  if(ohneHaus.length){
+    var d=document.createElement("div"); d.className="lobbyhaus"; d.style.setProperty("--f","#FDFCE4");
+    d.innerHTML="<span class='leise'>wählt gerade das Haus:</span> "+ohneHaus.map(function(n){ return "<span class='tag'>"+n+"</span>"; }).join("");
+    wrap.appendChild(d);
+  }
+  $("btn-los").disabled = (Object.keys(spieler).length-ohneHaus.length)===0;
+}
+$("btn-abbruch").onclick=function(){ DB.schreiben("sessions/"+CODE, null); baueDashboard(); };
+$("btn-los").onclick=naechsteFrage;
+$("btn-weiter").onclick=naechsteFrage;
+$("btn-schliessen").onclick=function(){
+  // Frage vorzeitig beenden: Timer stoppen und sofort aufloesen
+  if(beTimer){ clearInterval(beTimer); beTimer=null; }
+  if(aktuelleFrage) aufloesen(aktuelleFrage);
+};
+
+function naechsteFrage(){
+  frageNr++;
+  if(frageNr>=rundenFragen.length){ rundeBeenden(); return; }
+  var f=rundenFragen[frageNr]; aktuelleFrage=f;
+  DB.schreiben("sessions/"+CODE+"/frage", f, function(){
+    DB.schreiben("sessions/"+CODE+"/frageNr", frageNr, function(){
+      DB.schreiben("sessions/"+CODE+"/phase", "frage"); }); });
+  $("be-lobby").style.display="none"; $("be-aufloesung").style.display="none"; $("be-frage").style.display="block";
+  $("be-fortschritt").textContent="Frage "+(frageNr+1)+" von "+rundenFragen.length;
+  $("be-fragetext").textContent=f.frage;
+  $("be-konfusius").style.display = f.kategorie==="konfusius" ? "block" : "none";
+  var wrap=$("be-antworten"); wrap.innerHTML="";
+  f.antworten.forEach(function(txt,i){
+    var d=document.createElement("button"); d.className="a"+i; d.disabled=true; d.style.opacity=1;
+    d.innerHTML="<span class='glyph'>"+GLYPH[i]+"</span><span></span>"; d.lastChild.textContent=txt; wrap.appendChild(d);
+  });
+  var start=Date.now(), dauer=f.zeit*1000;
+  if(beTimer) clearInterval(beTimer);
+  beTimer=setInterval(function(){
+    var rest=1-(Date.now()-start)/dauer;
+    $("be-balken").style.width=Math.max(0,rest*100)+"%";
+    if(demoBots && Math.random()<0.15) botAntwortet(f);
+    var spieler=beDaten.spieler||{};
+    var antworten=(beDaten.antworten&&beDaten.antworten[frageNr])||{};
+    var alle=Object.keys(spieler).length>0 && Object.keys(antworten).length>=Object.keys(spieler).length;
+    if(rest<=0||alle){ clearInterval(beTimer); beTimer=null; aufloesen(f); }
+  },150);
+}
+function botAntwortet(f){
+  var spieler=beDaten.spieler||{};
+  var antworten=(beDaten.antworten&&beDaten.antworten[frageNr])||{};
+  var offen=Object.keys(spieler).filter(function(n){ return !antworten[n]; });
+  if(!offen.length) return;
+  var n=offen[Math.floor(Math.random()*offen.length)];
+  var wahl=Math.random()<0.65 ? f.richtig : Math.floor(Math.random()*f.antworten.length);
+  DB.schreiben("sessions/"+CODE+"/antworten/"+frageNr+"/"+n, {wahl:wahl, ms:2000+Math.random()*8000});
+}
+function zaehlerAnzeigen(){
+  var spieler=beDaten.spieler||{};
+  var antworten=(beDaten.antworten&&beDaten.antworten[frageNr])||{};
+  $("be-zaehler").textContent="Antworten: "+Object.keys(antworten).length+" / "+Object.keys(spieler).length;
+}
+function punkteFuer(antwort, frage){
+  var rest=Math.max(0, 1-antwort.ms/(frage.zeit*1000));
+  return 500+Math.round(500*rest);
+}
+function aufloesen(f){
+  var antworten=(beDaten.antworten&&beDaten.antworten[frageNr])||{};
+  var gesamt=Object.keys(antworten).length;
+  Object.keys(antworten).forEach(function(n){
+    if(antworten[n].wahl===f.richtig) rundenPunkte[n]=(rundenPunkte[n]||0)+punkteFuer(antworten[n],f);
+    else if(!(n in rundenPunkte)) rundenPunkte[n]=0;
+  });
+  DB.schreiben("sessions/"+CODE+"/phase","aufloesung");
+  $("be-frage").style.display="none"; $("be-aufloesung").style.display="block";
+  $("be-aufl-frage").textContent=f.frage;
+  var farben=["#F5CB5E","#B8E4FF","#FFC9C9","#E2D4FE"];
+  var vert=$("be-verteilung"); vert.innerHTML="";
+  f.antworten.forEach(function(txt,i){
+    var anz=Object.keys(antworten).filter(function(n){ return antworten[n].wahl===i; }).length;
+    var d=document.createElement("div"); d.className=(i===f.richtig?"richtig-markierung":"falsch");
+    d.style.setProperty("--f",farben[i]);
+    d.innerHTML="<i></i><span>"+GLYPH[i]+" "+(i===f.richtig?"✔ ":"")+"</span><span></span><span style='float:right;'><b>"+anz+"</b></span>";
+    d.children[2].textContent=txt;
+    vert.appendChild(d);
+    setTimeout(function(){ d.querySelector("i").style.width=(gesamt?anz/gesamt*100:0)+"%"; }, 60);
+  });
+  if(f.kategorie==="konfusius"){
+    var richtige=Object.keys(antworten).filter(function(n){ return antworten[n].wahl===f.richtig; });
+    var pool=richtige.length?richtige:Object.keys(beDaten.spieler||{});
+    if(pool.length){
+      var wer=pool[Math.floor(Math.random()*pool.length)];
+      var haus=hausVon((beDaten.spieler[wer]||{}).haus);
+      $("be-begruendung").style.display="block";
+      var warum = f.antworten[f.richtig].indexOf("recht")>=0 ? "Warum hat Konfusius recht?" : "Warum irrt sich Konfusius?";
+      $("be-begr-name").innerHTML="<b class='hand' style='color:var(--gold);'>"+wer+"</b> ("+(haus?haus.emoji+" "+haus.name:"")+"), erkläre: "+warum;
+      $("btn-begr-ok").onclick=function(){ rundenPunkte[wer]=(rundenPunkte[wer]||0)+250; $("be-begruendung").style.display="none"; };
+      $("btn-begr-weiter").onclick=function(){ $("be-begruendung").style.display="none"; };
+    }
+  } else $("be-begruendung").style.display="none";
+}
+function rundeBeenden(){
+  DB.schreiben("sessions/"+CODE+"/phase","ende");
+  $("be-aufloesung").style.display="none"; $("be-ende").style.display="block";
+  $("be-uebertragen-ok").textContent="";
+  var spieler=beDaten.spieler||{};
+  var wrap=$("be-endhaeuser"); wrap.innerHTML="";
+  var hausMittel={}, best=0;
+  KONFIG.haeuser.forEach(function(h){
+    var namen=Object.keys(spieler).filter(function(n){ return spieler[n].haus===h.id; });
+    var summe=0; namen.forEach(function(n){ summe+=rundenPunkte[n]||0; });
+    hausMittel[h.id]=namen.length?Math.round(summe/namen.length):0; best=Math.max(best,hausMittel[h.id]);
+  });
+  KONFIG.haeuser.forEach(function(h){
+    var namen=Object.keys(spieler).filter(function(n){ return spieler[n].haus===h.id; });
+    var d=document.createElement("div"); d.className="msiegel"+(best>0&&hausMittel[h.id]===best?" sieger":"");
+    d.style.setProperty("--f",h.farbe);
+    d.innerHTML="<div class='siegel'>"+h.emoji+"</div><div class='hand' style='color:"+h.farbe+"'>"+h.name+"</div>"+
+      "<div class='pkt hand'>+"+hausMittel[h.id]+"</div><div class='mini'>Mittel aus "+namen.length+" Forschern</div>";
+    wrap.appendChild(d);
+  });
+  var top=Object.keys(rundenPunkte).sort(function(a,b){ return (rundenPunkte[b]||0)-(rundenPunkte[a]||0); }).slice(0,3);
+  $("be-topliste").innerHTML=top.map(function(n,i){
+    return "<div>"+["🥇","🥈","🥉"][i]+" <b class='hand' style='color:var(--gold);'>"+n+"</b> – "+rundenPunkte[n]+" Punkte</div>"; }).join("")||"–";
+  $("btn-uebertragen").disabled=false;
+  $("btn-uebertragen").onclick=function(){
+    $("btn-uebertragen").disabled=true;
+    DB.lesen("konten/"+KLASSE, function(k){
+      k=k||{}; k.haeuser=k.haeuser||{}; k.spieler=k.spieler||{};
+      KONFIG.haeuser.forEach(function(h){ k.haeuser[h.id]=(k.haeuser[h.id]||0)+hausMittel[h.id]; });
+      Object.keys(rundenPunkte).forEach(function(n){
+        if(!k.spieler[n]) k.spieler[n]={haus:(spieler[n]||{}).haus||"", punkte:0};
+        k.spieler[n].punkte=(k.spieler[n].punkte||0)+(rundenPunkte[n]||0); });
+      DB.schreiben("konten/"+KLASSE, k, function(){
+        $("be-uebertragen-ok").textContent="✔ Übertragen! Die Haustafel ist aktuell.";
+        DB.schreiben("sessions/"+CODE, null);
+        setTimeout(baueDashboard, 1500);
+      });
+    });
+  };
+}
+
+// ================================================================
+//  Start
+// ================================================================
+dbInit(function(){
+  $("status").textContent = ECHT ? "" : "Demo-Modus";
+  $("start-fuss").textContent = ECHT ? "" : "Demo-Modus – alles bleibt auf diesem Gerät";
+  baueStart();
+});
+</script>
+</body>
+</html>
